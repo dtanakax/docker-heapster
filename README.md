@@ -37,6 +37,47 @@ Heapster Dockerコンテナ作成設定
 
     [https://github.com/GoogleCloudPlatform/heapster/blob/master/docs/source-configuration.md](https://github.com/GoogleCloudPlatform/heapster/blob/master/docs/source-configuration.md)
 
+トラブルシューティング
+---------------------
+
+正常に動作しない場合は
+[https://docs.docker.com/installation/ubuntulinux/#memory-and-swap-accounting](https://docs.docker.com/installation/ubuntulinux/#memory-and-swap-accounting)
+を参考にOSのMemorySwapを有効にする。
+
+- CoreOSの場合
+
+    Units作成 (user_dataへ追記)
+
+        units:
+            - name: swap.service
+              command: start
+              content: |
+                [Unit]
+                Description=Turn on swap
+
+                [Service]
+                Type=oneshot
+                Environment="SWAPFILE=/2GiB.swap"
+                RemainAfterExit=true
+                ExecStartPre=/usr/sbin/losetup -f ${SWAPFILE}
+                ExecStart=/usr/bin/sh -c "/sbin/swapon $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
+                ExecStop=/usr/bin/sh -c "/sbin/swapoff $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
+                ExecStopPost=/usr/bin/sh -c "/usr/sbin/losetup -d $(/usr/sbin/losetup -j ${SWAPFILE} | /usr/bin/cut -d : -f 1)"
+
+                [Install]
+                WantedBy=local.target
+
+    Swapファイル作成
+
+        $ sudo fallocate -l 2048m /2GiB.swap
+        $ sudo chmod 600 /2GiB.swap
+        $ sudo chattr +C /2GiB.swap
+        $ sudo mkswap /2GiB.swap
+
+    OSリブート
+        
+        $ sudo reboot
+
 License
 ---------------------
 
