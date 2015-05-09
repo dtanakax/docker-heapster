@@ -1,31 +1,24 @@
 #!/bin/bash
 set -e
 
-if [ "$1" = "/usr/bin/heapster" ]; then
-    EXTRA_ARGS=""
+if [ $CADVISOR_SERVICE_IPS != "**None**" ]; then
+    HOSTS_FNAME=/var/run/heapster/hosts
+    rm -f $HOSTS_FNAME
+    touch $HOSTS_FNAME
+    echo "{" >> $HOSTS_FNAME
+    echo "  \"items\": [" >> $HOSTS_FNAME
 
-    # If in Kubernetes, target the master.
-    if [ $KUBERNETES_RO_SERVICE_HOST != "**None**" ]; then
-        EXTRA_ARGS="--source=kubernetes:${KUBERNETES_RO_SERVICE_HOST}"
-    elif [ $COREOS_FLEET_SERVICE_HOST != "**None**" ]; then
-        EXTRA_ARGS="--source=cadvisor:coreos?fleetEndpoint=${COREOS_FLEET_SERVICE_HOST}"
-    fi
-
-    case $SINK in
-        'influxdb') 
-            if [ -n $INFLUXDB_HOST ]; then
-                EXTRA_ARGS="--sink influxdb:${INFLUXDB_HOST} $EXTRA_ARGS"
-            else
-                echo "Influxdb host invalid."
-                exit 1
-            fi
-            ;;
-        'gcm') 
-            EXTRA_ARGS="--sink gcm $EXTRA_ARGS"
-            ;;
-    esac
-
-    exec "$@" $EXTRA_ARGS
-else
-    exec "$@"
+    items=()
+    IFS=';'
+    idx=1
+    for ip in $CADVISOR_SERVICE_IPS; do
+        items+=("{\"name\":\"cadvisor${idx}\", \"ip\":\"${ip}\"}")
+        idx=$((idx+1))
+    done
+    echo "$(IFS=,; echo "    ${items[*]}")" >> $HOSTS_FNAME
+    echo "  ]" >> $HOSTS_FNAME
+    echo "}" >> $HOSTS_FNAME
 fi
+
+exec /usr/bin/heapster "$@"
+

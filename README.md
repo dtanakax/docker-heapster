@@ -16,7 +16,26 @@ Heapster Dockerコンテナ作成設定
 使用方法
 ---------------------
 
-参考URL:[https://github.com/GoogleCloudPlatform/heapster](https://github.com/GoogleCloudPlatform/heapster)
+- cAdvisor IPアドレス直接指定する場合  
+環境変数`CADVISOR_SERVICE_IPS`へカンマ区切りで設定します。
+
+        $ docker run -d \
+                --name heapster \
+                -e CADVISOR_SERVICE_IPS="10.1.x.xxx;10.1.x.xxx" \
+            dtanakax/heapster \
+                 --sink=influxdb:http://<influxdb_ip>:8086/ --source=cadvisor:external
+
+- CoreOSのFleet使用する場合  
+
+        $ docker run -d \
+                --name heapster \
+            dtanakax/heapster
+                --sink=influxdb:http://<influxdb_ip>:8086/ \
+                --source=cadvisor:coreos?fleetEndpoint=http://<fleet_ip>:4001
+
+- その他のオプションについては以下のURLを参考にして下さい。
+
+    [https://github.com/GoogleCloudPlatform/heapster/blob/master/docs/source-configuration.md](https://github.com/GoogleCloudPlatform/heapster/blob/master/docs/source-configuration.md)
 
 License
 ---------------------

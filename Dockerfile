@@ -25,11 +25,6 @@ RUN chmod +x /start.sh
 
 ENTRYPOINT ["./start.sh"]
 
-# "influxdb" or "gcm"
-ENV SINK **None**
-# ServiceHost URI e.g: http://<ipaddr>:<port>
-ENV KUBERNETES_RO_SERVICE_HOST **None**
-ENV COREOS_FLEET_SERVICE_HOST **None**
-ENV INFLUXDB_HOST http://localhost:4001
+# ServiceIP e.g: <cadvisor01_ip>;<cadvisor02_ip>;<cadvisor03_ip>
+ENV CADVISOR_SERVICE_IPS **None**
 
-CMD ["/usr/bin/heapster"]
