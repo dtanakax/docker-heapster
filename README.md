@@ -29,7 +29,7 @@ Heapster Dockerコンテナ作成設定
 
         $ docker run -d \
                 --name heapster \
-            dtanakax/heapster
+            dtanakax/heapster \
                 --sink=influxdb:http://<influxdb_ip>:8086/ \
                 --source=cadvisor:coreos?fleetEndpoint=http://<fleet_ip>:4001
 
