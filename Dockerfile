@@ -11,7 +11,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 RUN apt-get clean all
 
-ENV HEAPSTER_VERSION v0.12.1
+ENV HEAPSTER_VERSION v0.13.0
 
 # cAdvisor discovery via external files.
 RUN mkdir -p /var/run/heapster && touch /var/run/heapster/hosts
